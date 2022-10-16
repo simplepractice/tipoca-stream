@@ -6,7 +6,6 @@ import (
 
 	"encoding/json"
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
@@ -46,8 +45,6 @@ func NewS3Sink(
 
 	awsConfig := &aws.Config{
 		Region: aws.String(s3Region),
-		Credentials: credentials.NewStaticCredentials(
-			awsAccessKeyID, awsSecretAccessKey, ""),
 	}
 
 	awsConfig = awsConfig.WithCredentialsChainVerboseErrors(true)

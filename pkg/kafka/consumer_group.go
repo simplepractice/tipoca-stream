@@ -32,10 +32,11 @@ type ConsumerGroupConfig struct {
 }
 
 type KafkaConfig struct {
-	Brokers     string    `yaml:"brokers"`
-	Version     string    `yaml:"version"`     // default is there
-	KafkaClient string    `yaml:"kafkaClient"` // default is there
-	TLSConfig   TLSConfig `yaml:"tlsConfig"`
+	Brokers     string     `yaml:"brokers"`
+	Version     string     `yaml:"version"`     // default is there
+	KafkaClient string     `yaml:"kafkaClient"` // default is there
+	TLSConfig   TLSConfig  `yaml:"tlsConfig"`
+	SaslConfig  SaslConfig `yaml:"saslConfig"`
 }
 
 func NewConsumerGroup(

@@ -94,6 +94,7 @@ func newBatchProcessor(
 		strings.Split(kafkaConfig.Brokers, ","),
 		kafkaConfig.Version,
 		kafkaConfig.TLSConfig,
+		kafkaConfig.SaslConfig,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("unable to make signaler client, err:%v\n", err)

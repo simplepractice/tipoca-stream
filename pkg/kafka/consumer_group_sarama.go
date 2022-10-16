@@ -22,6 +22,11 @@ type SaramaConfig struct {
 	SessionTimeoutSeconds   *int   `yaml:"sessionTimeoutSeconds,omitempty"`   // default 20s
 	HearbeatIntervalSeconds *int   `yaml:"hearbeatIntervalSeconds,omitempty"` // default 6s
 	MaxProcessingTime       *int32 `yaml:"maxProcessingTime,omitempty"`       // default is of sarama
+	SaslEnable              bool   `yaml:"saslEnable"`
+	SaslTLSEnable           bool   `yaml:"saslTLSEnable"`
+	SaslMachanism           string `yaml:"saslMachanism"`
+	SaslUser                string `yaml:"saslUser"`
+	SaslPassword            string `yaml:"saslPassword"`
 }
 
 type saramaConsumerGroup struct {
@@ -103,7 +108,25 @@ func NewSaramaConsumerGroup(
 	// https://github.com/Shopify/sarama/issues/1570#issuecomment-574908417
 	c.Consumer.Offsets.AutoCommit.Enable = config.Sarama.AutoCommit
 
-	// TODO: find the correct values and make it confiurable
+	if config.Sarama.SaslEnable {
+		c.Net.SASL.Enable = true
+
+		c.Net.SASL.User = config.Sarama.SaslUser
+		c.Net.SASL.Password = config.Sarama.SaslPassword
+		c.Net.SASL.Handshake = true
+		c.Net.TLS.Enable = config.Sarama.SaslTLSEnable
+		if config.Sarama.SaslMachanism == "sha512" {
+			c.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient { return &XDGSCRAMClient{HashGeneratorFcn: SHA512} }
+			c.Net.SASL.Mechanism = sarama.SASLTypeSCRAMSHA512
+		} else if config.Sarama.SaslMachanism == "sha256" {
+			c.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient { return &XDGSCRAMClient{HashGeneratorFcn: SHA256} }
+			c.Net.SASL.Mechanism = sarama.SASLTypeSCRAMSHA256
+		} else {
+			return nil, fmt.Errorf("invalid SHA algorithm \"%s\": can be either \"sha256\" or \"sha512\"", config.Sarama.SaslMachanism)
+		}
+	}
+
+	//_ TODO: find the correct values and make it confiurable
 	// c.Consumer.Fetch.Min = 3
 	// c.Consumer.Fetch.Max = 10
 	brokers := strings.Split(config.Kafka.Brokers, ",")

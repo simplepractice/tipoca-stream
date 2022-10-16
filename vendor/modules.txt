@@ -461,6 +461,15 @@ github.com/whilp/git-urls
 # github.com/xanzy/ssh-agent v0.3.0
 ## explicit
 github.com/xanzy/ssh-agent
+# github.com/xdg-go/pbkdf2 v1.0.0
+## explicit; go 1.9
+github.com/xdg-go/pbkdf2
+# github.com/xdg-go/scram v1.0.2
+## explicit; go 1.11
+github.com/xdg-go/scram
+# github.com/xdg-go/stringprep v1.0.2
+## explicit; go 1.11
+github.com/xdg-go/stringprep
 # golang.org/x/crypto v0.0.0-20210920023735-84f357641f63
 ## explicit; go 1.17
 golang.org/x/crypto/blowfish

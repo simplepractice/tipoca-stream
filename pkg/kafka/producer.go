@@ -16,6 +16,7 @@ func NewAvroProducer(
 	brokers []string,
 	kafkaVersion string,
 	configTLS TLSConfig,
+	saslConfig SaslConfig,
 ) (
 	*AvroProducer, error,
 ) {
@@ -42,6 +43,22 @@ func NewAvroProducer(
 		config.Net.TLS.Config = tlsConfig
 	}
 
+	if saslConfig.SaslEnable {
+		config.Net.SASL.Enable = true
+		config.Net.SASL.User = saslConfig.SaslUser
+		config.Net.SASL.Password = saslConfig.SaslPassword
+		config.Net.SASL.Handshake = true
+		config.Net.TLS.Enable = saslConfig.SaslTLSEnable
+		if saslConfig.SaslMachanism == "sha512" {
+			config.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient { return &XDGSCRAMClient{HashGeneratorFcn: SHA512} }
+			config.Net.SASL.Mechanism = sarama.SASLTypeSCRAMSHA512
+		} else if saslConfig.SaslMachanism == "sha256" {
+			config.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient { return &XDGSCRAMClient{HashGeneratorFcn: SHA256} }
+			config.Net.SASL.Mechanism = sarama.SASLTypeSCRAMSHA256
+		} else {
+			return nil, fmt.Errorf("invalid SHA algorithm \"%s\": can be either \"sha256\" or \"sha512\"", saslConfig.SaslMachanism)
+		}
+	}
 	producer, err := sarama.NewSyncProducer(brokers, config)
 	if err != nil {
 		return nil, err
